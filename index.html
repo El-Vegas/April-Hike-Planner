@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>April Hike Planner 🥾</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #2d6a4f;
+    --green-light: #40916c;
+    --green-pale: #d8f3dc;
+    --green-bg: #f0faf3;
+    --orange: #e76f51;
+    --sand: #fefae0;
+    --bark: #3d2c2c;
+    --stone: #6b705c;
+    --mist: #f8f9fa;
+    --white: #ffffff;
+    --shadow: 0 2px 12px rgba(45,106,79,0.12);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--green-bg);
+    color: var(--bark);
+    min-height: 100vh;
+    padding: 0 0 100px 0;
+    overflow-x: hidden;
+  }
+  .header {
+    background: linear-gradient(135deg, var(--green) 0%, var(--green-light) 100%);
+    color: white;
+    padding: 28px 20px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '⛰️';
+    position: absolute;
+    font-size: 120px;
+    opacity: 0.08;
+    top: -20px;
+    right: -10px;
+  }
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+  .header p { font-size: 14px; opacity: 0.85; line-height: 1.4; }
+  .info-bar {
+    background: var(--sand);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    padding: 14px 20px;
+    font-size: 13px;
+    color: var(--stone);
+    line-height: 1.5;
+  }
+  .info-bar strong { color: var(--bark); }
+  .section { padding: 20px 16px; }
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--stone);
+    margin-bottom: 14px;
+  }
+  .person-card {
+    background: var(--white);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 700; color: white; flex-shrink: 0;
+  }
+  .person-info { flex: 1; min-width: 0; }
+  .person-name { font-weight: 700; font-size: 15px; margin-bottom: 2px; }
+  .person-note { font-size: 12px; color: var(--stone); line-height: 1.4; }
+  .calendar-wrapper {
+    background: var(--white);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .cal-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: var(--green);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+  .cal-header span { padding: 10px 0; }
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+  }
+  .cal-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 500;
+    border: 0.5px solid rgba(0,0,0,0.04);
+    position: relative;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .cal-day.empty { cursor: default; }
+  .cal-day.past { color: #ccc; cursor: default; }
+  .cal-day:not(.empty):not(.past):active { transform: scale(0.92); }
+  .cal-day .dot {
+    width: 6px; height: 6px; border-radius: 50%; margin-top: 3px;
+  }
+  .cal-day.sunday { background: rgba(45,106,79,0.04); }
+  .cal-day.monday { background: rgba(231,111,81,0.04); }
+  .cal-day.selected {
+    background: var(--green) !important;
+    color: white;
+    border-radius: 8px;
+    font-weight: 700;
+  }
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    padding: 14px 16px;
+    background: var(--mist);
+    border-top: 1px solid rgba(0,0,0,0.04);
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 11px; color: var(--stone);
+  }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .day-detail {
+    background: var(--white);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 20px;
+    margin-top: 16px;
+    display: none;
+    animation: slideUp 0.25s ease;
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .day-detail.show { display: block; }
+  .day-detail h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px; margin-bottom: 4px;
+  }
+  .day-detail .day-type { font-size: 12px; color: var(--stone); margin-bottom: 16px; }
+  .availability-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+  }
+  .availability-row:last-child { border-bottom: none; }
+  .avail-icon {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; flex-shrink: 0;
+  }
+  .avail-yes { background: #d8f3dc; }
+  .avail-maybe { background: #fff3cd; }
+  .avail-no { background: #fde8e8; }
+  .avail-name { font-weight: 600; font-size: 14px; }
+  .avail-note { font-size: 11px; color: var(--stone); margin-top: 1px; }
+  .score-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px; border-radius: 20px;
+    font-size: 12px; font-weight: 700; margin-bottom: 14px;
+  }
+  .score-great { background: #d8f3dc; color: #2d6a4f; }
+  .score-good { background: #fff3cd; color: #7c6a0a; }
+  .score-tough { background: #fde8e8; color: #c0392b; }
+  .mike-note {
+    background: var(--sand); border-radius: 10px;
+    padding: 10px 14px; margin-top: 14px;
+    font-size: 12px; color: var(--stone); line-height: 1.4;
+  }
+  .mike-note strong { color: var(--bark); }
+  .best-days {
+    background: linear-gradient(135deg, var(--green) 0%, var(--green-light) 100%);
+    border-radius: 16px; padding: 20px; color: white; margin-top: 16px;
+  }
+  .best-days h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px; margin-bottom: 12px;
+  }
+  .best-day-item {
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px; padding: 10px 14px;
+    margin-bottom: 8px; font-size: 14px;
+    cursor: pointer;
+  }
+  .best-day-item:last-child { margin-bottom: 0; }
+  .best-day-item .date { font-weight: 700; }
+  .best-day-item .reason { font-size: 12px; opacity: 0.8; margin-top: 2px; }
+  .tip {
+    text-align: center; padding: 24px 20px;
+    font-size: 12px; color: var(--stone); line-height: 1.5;
+  }
+  .color-chris { background: #e76f51; }
+  .color-yegor { background: #264653; }
+  .color-eli { background: #2a9d8f; }
+  .color-kevin { background: #e9c46a; }
+  .color-mike { background: #7b2cbf; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🥾 April Hike Planner</h1>
+  <p>Let's find the best day for all 5 of us!</p>
+</div>
+
+<div class="info-bar">
+  <strong>🕚 Mike starts after 11 AM</strong> — leaves house at 11, arrives ~11:20. Plan meeting time accordingly!
+</div>
+
+<div class="section">
+  <div class="section-title">👥 The Crew & Schedules</div>
+  <div class="person-card">
+    <div class="avatar color-chris">C</div>
+    <div class="person-info">
+      <div class="person-name">Chris</div>
+      <div class="person-note">Works Tue–Sat. Free <strong>Sun & Mon</strong> — but Mon needs to be home by 4 PM</div>
+    </div>
+  </div>
+  <div class="person-card">
+    <div class="avatar color-yegor">Y</div>
+    <div class="person-info">
+      <div class="person-name">Yegor</div>
+      <div class="person-note">Poker tournaments on <strong>Sundays</strong> — can skip sometimes</div>
+    </div>
+  </div>
+  <div class="person-card">
+    <div class="avatar color-eli">E</div>
+    <div class="person-info">
+      <div class="person-name">Eli</div>
+      <div class="person-note">School on <strong>Mondays</strong> — can skip sometimes</div>
+    </div>
+  </div>
+  <div class="person-card">
+    <div class="avatar color-kevin">K</div>
+    <div class="person-info">
+      <div class="person-name">Kevin</div>
+      <div class="person-note">Prefers <strong>weekdays</strong> (probably) — can do Sundays sometimes</div>
+    </div>
+  </div>
+  <div class="person-card">
+    <div class="avatar color-mike">M</div>
+    <div class="person-info">
+      <div class="person-name">Mike</div>
+      <div class="person-note">Starts after <strong>11 AM</strong> only — 20 min drive to meeting spot</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">📅 April 2026 — Tap a day</div>
+  <div class="calendar-wrapper">
+    <div class="cal-header">
+      <span>SUN</span><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#2d6a4f"></div> Great for all</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#e9c46a"></div> Possible (some may skip)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ddd"></div> Hard day</div>
+    </div>
+  </div>
+  <div class="day-detail" id="dayDetail"></div>
+  <div class="best-days" id="bestDays">
+    <h3>🏆 Best Days</h3>
+    <div id="bestDaysList"></div>
+  </div>
+</div>
+
+<div class="tip">
+  Tap any date above to see everyone's availability.<br>
+  Sundays &amp; Mondays are our best bet since Chris is off!
+</div>
+
+<script>
+(function() {
+  var people = [
+    { name: 'Chris', key: 'chris' },
+    { name: 'Yegor', key: 'yegor' },
+    { name: 'Eli', key: 'eli' },
+    { name: 'Kevin', key: 'kevin' },
+    { name: 'Mike', key: 'mike' }
+  ];
+
+  function getAvailability(dow) {
+    var a = {};
+    if (dow === 0) a.chris = { status: 'yes', note: 'Day off \u2014 fully free' };
+    else if (dow === 1) a.chris = { status: 'yes', note: 'Day off \u2014 but needs to be home by 4 PM' };
+    else a.chris = { status: 'no', note: 'Working' };
+
+    if (dow === 0) a.yegor = { status: 'maybe', note: 'Poker tournament \u2014 can skip if needed' };
+    else a.yegor = { status: 'yes', note: 'Free' };
+
+    if (dow === 1) a.eli = { status: 'maybe', note: 'School \u2014 can skip if needed' };
+    else a.eli = { status: 'yes', note: 'Free' };
+
+    if (dow >= 1 && dow <= 5) a.kevin = { status: 'yes', note: 'Prefers weekdays \u2014 good' };
+    else if (dow === 0) a.kevin = { status: 'maybe', note: 'Can do Sundays sometimes' };
+    else a.kevin = { status: 'maybe', note: 'Weekend \u2014 less preferred' };
+
+    a.mike = { status: 'yes', note: 'Available \u2014 departs 11 AM, arrives 11:20' };
+    return a;
+  }
+
+  function getScore(dow) {
+    var avail = getAvailability(dow);
+    var yes = 0, maybe = 0, no = 0;
+    for (var k in avail) {
+      if (avail[k].status === 'yes') yes++;
+      else if (avail[k].status === 'maybe') maybe++;
+      else no++;
+    }
+    return { yes: yes, maybe: maybe, no: no };
+  }
+
+  function selectDay(day, dow) {
+    var prev = document.querySelectorAll('.cal-day.selected');
+    for (var p = 0; p < prev.length; p++) prev[p].classList.remove('selected');
+    var el = document.querySelector('.cal-day[data-day="' + day + '"]');
+    if (el) el.classList.add('selected');
+
+    var avail = getAvailability(dow);
+    var score = getScore(dow);
+    var dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+    var badge = '';
+    if (score.no > 0) badge = '<span class="score-badge score-tough">\u274C Someone can\'t make it</span>';
+    else if (score.yes === 5) badge = '<span class="score-badge score-great">\u2705 Everyone free!</span>';
+    else badge = '<span class="score-badge score-good">\u26A0\uFE0F ' + score.maybe + ' might need to skip something</span>';
+
+    var rows = '';
+    for (var i = 0; i < people.length; i++) {
+      var pr = people[i];
+      var a = avail[pr.key];
+      var iconClass = 'avail-yes', icon = '\u2705';
+      if (a.status === 'maybe') { iconClass = 'avail-maybe'; icon = '\uD83E\uDD14'; }
+      if (a.status === 'no') { iconClass = 'avail-no'; icon = '\u274C'; }
+      rows += '<div class="availability-row"><div class="avail-icon ' + iconClass + '">' + icon + '</div><div><div class="avail-name">' + pr.name + '</div><div class="avail-note">' + a.note + '</div></div></div>';
+    }
+
+    var mikeNote = '';
+    if (dow === 1) {
+      mikeNote = '<div class="mike-note"><strong>\u23F0 Monday timing:</strong> Mike leaves at 11, arrives ~11:20. Chris needs to be home by 4 PM. That gives us roughly <strong>11:20 AM \u2013 3:00 PM</strong> for the hike (with travel buffer for Chris).</div>';
+    } else {
+      mikeNote = '<div class="mike-note"><strong>\u23F0 Reminder:</strong> Mike leaves house at 11 AM and arrives at the meeting spot around 11:20. Plan start time accordingly!</div>';
+    }
+
+    var detail = document.getElementById('dayDetail');
+    detail.innerHTML = '<h3>' + dayNames[dow] + '</h3><div class="day-type">April ' + day + ', 2026</div>' + badge + rows + mikeNote;
+    detail.className = 'day-detail show';
+    setTimeout(function() { detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 50);
+  }
+
+  // Build calendar
+  var grid = document.getElementById('calGrid');
+  var startDay = 3; // April 1 2026 = Wednesday
+  var today = new Date();
+  var html = '';
+
+  for (var i = 0; i < startDay; i++) {
+    html += '<div class="cal-day empty"></div>';
+  }
+
+  for (var d = 1; d <= 30; d++) {
+    var dow = (startDay + d - 1) % 7;
+    var date = new Date(2026, 3, d);
+    var isPast = date < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    var score = getScore(dow);
+    var dotColor = '#ddd';
+    if (score.no === 0 && score.maybe === 0) dotColor = '#2d6a4f';
+    else if (score.no === 0) dotColor = '#e9c46a';
+
+    var cls = 'cal-day';
+    if (isPast) cls += ' past';
+    if (dow === 0) cls += ' sunday';
+    if (dow === 1) cls += ' monday';
+
+    html += '<div class="' + cls + '" data-day="' + d + '" data-dow="' + dow + '">' + d + '<div class="dot" style="background:' + (isPast ? '#eee' : dotColor) + '"></div></div>';
+  }
+  grid.innerHTML = html;
+
+  var cells = grid.querySelectorAll('.cal-day:not(.empty):not(.past)');
+  for (var c = 0; c < cells.length; c++) {
+    (function(cell) {
+      cell.addEventListener('click', function() {
+        selectDay(parseInt(cell.getAttribute('data-day')), parseInt(cell.getAttribute('data-dow')));
+      });
+    })(cells[c]);
+  }
+
+  // Build best days
+  var list = document.getElementById('bestDaysList');
+  var ranked = [];
+  for (var d2 = 1; d2 <= 30; d2++) {
+    var dow2 = (startDay + d2 - 1) % 7;
+    var date2 = new Date(2026, 3, d2);
+    if (date2 < new Date(today.getFullYear(), today.getMonth(), today.getDate())) continue;
+    var sc = getScore(dow2);
+    if (sc.no === 0) ranked.push({ day: d2, dow: dow2, score: sc });
+  }
+  ranked.sort(function(a, b) {
+    if (b.score.yes !== a.score.yes) return b.score.yes - a.score.yes;
+    return a.score.maybe - b.score.maybe;
+  });
+
+  var dn = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var top = ranked.slice(0, 6);
+  var bhtml = '';
+  for (var t = 0; t < top.length; t++) {
+    var r = top[t];
+    var reason = '';
+    if (r.score.yes === 5) reason = 'Everyone fully free!';
+    else if (r.dow === 0) reason = 'Yegor & Kevin might need to adjust';
+    else if (r.dow === 1) reason = 'Eli might skip school \u00B7 Chris home by 4 PM';
+    else reason = r.score.maybe + ' person(s) might adjust';
+    bhtml += '<div class="best-day-item" data-day="' + r.day + '" data-dow="' + r.dow + '"><div class="date">' + dn[r.dow] + ', April ' + r.day + '</div><div class="reason">' + r.score.yes + '/5 confirmed \u00B7 ' + reason + '</div></div>';
+  }
+  list.innerHTML = bhtml;
+
+  var items = list.querySelectorAll('.best-day-item');
+  for (var j = 0; j < items.length; j++) {
+    (function(item) {
+      item.addEventListener('click', function() {
+        selectDay(parseInt(item.getAttribute('data-day')), parseInt(item.getAttribute('data-dow')));
+        document.getElementById('calGrid').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    })(items[j]);
+  }
+})();
+</script>
+</body>
+</html>
