@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>April Hike Planner 🥾</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 <style>
   :root {
     --green: #2d6a4f;
@@ -30,56 +30,118 @@
   }
   .header {
     background: linear-gradient(135deg, var(--green) 0%, var(--green-light) 100%);
-    color: white;
-    padding: 28px 20px 24px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
+    color: white; padding: 28px 20px 24px; text-align: center;
+    position: relative; overflow: hidden;
   }
   .header::before {
-    content: '⛰️';
-    position: absolute;
-    font-size: 120px;
-    opacity: 0.08;
-    top: -20px;
-    right: -10px;
+    content: '⛰️'; position: absolute; font-size: 120px;
+    opacity: 0.08; top: -20px; right: -10px;
   }
   .header h1 {
     font-family: 'Playfair Display', serif;
-    font-size: 26px;
-    letter-spacing: -0.5px;
-    margin-bottom: 6px;
+    font-size: 26px; letter-spacing: -0.5px; margin-bottom: 6px;
   }
   .header p { font-size: 14px; opacity: 0.85; line-height: 1.4; }
   .info-bar {
-    background: var(--sand);
-    border-bottom: 1px solid rgba(0,0,0,0.06);
-    padding: 14px 20px;
-    font-size: 13px;
-    color: var(--stone);
-    line-height: 1.5;
+    background: var(--sand); border-bottom: 1px solid rgba(0,0,0,0.06);
+    padding: 14px 20px; font-size: 13px; color: var(--stone); line-height: 1.5;
   }
   .info-bar strong { color: var(--bark); }
+  .sticky-badge {
+    display: none;
+    position: fixed; top: 10px; right: 10px; z-index: 1000;
+    background: var(--white); border-radius: 40px;
+    padding: 6px 14px 6px 6px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+    align-items: center; gap: 8px; cursor: pointer;
+    transition: all 0.2s; border: 2px solid var(--green);
+  }
+  .sticky-badge.show { display: flex; }
+  .sticky-badge:active { transform: scale(0.95); }
+  .sticky-badge .badge-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: white; flex-shrink: 0;
+  }
+  .sticky-badge .badge-name { font-size: 13px; font-weight: 700; color: var(--bark); }
+  .sticky-badge .badge-switch { font-size: 10px; color: var(--green); margin-left: 2px; }
+  .who-screen { padding: 30px 20px; text-align: center; }
+  .who-screen h2 {
+    font-family: 'Playfair Display', serif; font-size: 24px; margin-bottom: 6px;
+  }
+  .who-screen p { font-size: 14px; color: var(--stone); margin-bottom: 24px; line-height: 1.5; }
+  .who-grid {
+    display: flex; flex-direction: column; gap: 10px;
+    max-width: 340px; margin: 0 auto;
+  }
+  .who-btn {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--white); border: 2.5px solid transparent;
+    border-radius: 14px; padding: 16px 18px;
+    box-shadow: var(--shadow); cursor: pointer;
+    transition: all 0.2s ease; font-family: 'DM Sans', sans-serif;
+    font-size: 16px; font-weight: 600; color: var(--bark);
+    width: 100%; text-align: left;
+  }
+  .who-btn:active { transform: scale(0.97); }
+  .who-btn .avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 19px; font-weight: 700; color: white; flex-shrink: 0;
+  }
+  .who-btn .who-right { flex: 1; }
+  .who-btn .who-fullname { font-size: 17px; font-weight: 700; }
+  .who-btn .who-note { font-size: 12px; font-weight: 400; color: var(--stone); margin-top: 2px; }
+  .who-btn:hover, .who-btn:focus { border-color: var(--green-light); }
+  .confirm-overlay {
+    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5); z-index: 2000;
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .confirm-overlay.show { display: flex; }
+  .confirm-box {
+    background: var(--white); border-radius: 20px;
+    padding: 28px 24px; text-align: center;
+    max-width: 300px; width: 100%;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+    animation: popIn 0.25s ease;
+  }
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .confirm-box .confirm-avatar {
+    width: 56px; height: 56px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; font-weight: 700; color: white; margin: 0 auto 14px;
+  }
+  .confirm-box h3 {
+    font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 6px;
+  }
+  .confirm-box p { font-size: 13px; color: var(--stone); margin-bottom: 20px; line-height: 1.4; }
+  .confirm-btns { display: flex; gap: 10px; }
+  .confirm-btns button {
+    flex: 1; padding: 12px; border-radius: 10px; border: none;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .confirm-btns button:active { transform: scale(0.96); }
+  .btn-cancel { background: #f0f0f0; color: var(--bark); }
+  .btn-confirm { background: var(--green); color: white; }
+  .app { display: none; }
+  .app.show { display: block; }
   .section { padding: 20px 16px; }
   .section-title {
-    font-size: 13px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    color: var(--stone);
-    margin-bottom: 14px;
+    font-size: 13px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.2px; color: var(--stone); margin-bottom: 14px;
   }
   .person-card {
-    background: var(--white);
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-    box-shadow: var(--shadow);
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
+    background: var(--white); border-radius: 14px;
+    padding: 14px 16px; margin-bottom: 10px;
+    box-shadow: var(--shadow); display: flex;
+    align-items: flex-start; gap: 12px;
   }
-  .avatar {
+  .avatar-sm {
     width: 40px; height: 40px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     font-size: 18px; font-weight: 700; color: white; flex-shrink: 0;
@@ -88,59 +150,52 @@
   .person-name { font-weight: 700; font-size: 15px; margin-bottom: 2px; }
   .person-note { font-size: 12px; color: var(--stone); line-height: 1.4; }
   .calendar-wrapper {
-    background: var(--white);
-    border-radius: 16px;
-    box-shadow: var(--shadow);
-    overflow: hidden;
+    background: var(--white); border-radius: 16px;
+    box-shadow: var(--shadow); overflow: hidden;
   }
   .cal-header {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    background: var(--green);
-    color: white;
-    font-size: 11px;
-    font-weight: 700;
-    text-align: center;
-    letter-spacing: 0.5px;
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    background: var(--green); color: white;
+    font-size: 11px; font-weight: 700; text-align: center; letter-spacing: 0.5px;
   }
   .cal-header span { padding: 10px 0; }
-  .cal-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-  }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
   .cal-day {
-    aspect-ratio: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: 15px;
-    font-weight: 500;
+    aspect-ratio: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 500;
     border: 0.5px solid rgba(0,0,0,0.04);
-    position: relative;
-    cursor: pointer;
+    position: relative; cursor: pointer;
     transition: all 0.15s ease;
-    -webkit-user-select: none;
-    user-select: none;
+    -webkit-user-select: none; user-select: none;
   }
-  .cal-day.empty { cursor: default; }
-  .cal-day.past { color: #ccc; cursor: default; }
+  .cal-day.empty, .cal-day.past { cursor: default; }
+  .cal-day.past { color: #ccc; }
   .cal-day:not(.empty):not(.past):active { transform: scale(0.92); }
-  .cal-day .dot {
-    width: 6px; height: 6px; border-radius: 50%; margin-top: 3px;
+  .cal-day .dots {
+    display: flex; gap: 2px; margin-top: 2px; min-height: 7px; flex-wrap: wrap;
+    justify-content: center; max-width: 36px;
   }
+  .cal-day .dot { width: 6px; height: 6px; border-radius: 50%; }
   .cal-day.sunday { background: rgba(45,106,79,0.04); }
   .cal-day.monday { background: rgba(231,111,81,0.04); }
-  .cal-day.selected {
-    background: var(--green) !important;
-    color: white;
-    border-radius: 8px;
-    font-weight: 700;
+  .cal-day.my-pick {
+    background: var(--green) !important; color: white;
+    border-radius: 8px; font-weight: 700;
+  }
+  .cal-day.my-pick .dot { box-shadow: 0 0 0 1px rgba(255,255,255,0.5); }
+  .cal-day.all-picked {
+    background: linear-gradient(135deg, #f9c74f, #f8961e) !important;
+    color: white; border-radius: 8px; font-weight: 700;
+    animation: glow 1.5s ease-in-out infinite alternate;
+  }
+  @keyframes glow {
+    from { box-shadow: 0 0 4px rgba(249,199,79,0.4); }
+    to { box-shadow: 0 0 12px rgba(249,199,79,0.8); }
   }
   .legend {
     display: flex; flex-wrap: wrap; gap: 10px;
-    padding: 14px 16px;
-    background: var(--mist);
+    padding: 14px 16px; background: var(--mist);
     border-top: 1px solid rgba(0,0,0,0.04);
   }
   .legend-item {
@@ -149,13 +204,9 @@
   }
   .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
   .day-detail {
-    background: var(--white);
-    border-radius: 16px;
-    box-shadow: var(--shadow);
-    padding: 20px;
-    margin-top: 16px;
-    display: none;
-    animation: slideUp 0.25s ease;
+    background: var(--white); border-radius: 16px;
+    box-shadow: var(--shadow); padding: 20px; margin-top: 16px;
+    display: none; animation: slideUp 0.25s ease;
   }
   @keyframes slideUp {
     from { opacity: 0; transform: translateY(10px); }
@@ -163,57 +214,73 @@
   }
   .day-detail.show { display: block; }
   .day-detail h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 20px; margin-bottom: 4px;
+    font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 4px;
   }
   .day-detail .day-type { font-size: 12px; color: var(--stone); margin-bottom: 16px; }
-  .availability-row {
+  .vote-row {
     display: flex; align-items: center; gap: 10px;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(0,0,0,0.04);
+    padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.04);
   }
-  .availability-row:last-child { border-bottom: none; }
-  .avail-icon {
+  .vote-row:last-of-type { border-bottom: none; }
+  .vote-icon {
     width: 28px; height: 28px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
     font-size: 13px; flex-shrink: 0;
   }
-  .avail-yes { background: #d8f3dc; }
-  .avail-maybe { background: #fff3cd; }
-  .avail-no { background: #fde8e8; }
-  .avail-name { font-weight: 600; font-size: 14px; }
-  .avail-note { font-size: 11px; color: var(--stone); margin-top: 1px; }
-  .score-badge {
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 4px 10px; border-radius: 20px;
-    font-size: 12px; font-weight: 700; margin-bottom: 14px;
-  }
-  .score-great { background: #d8f3dc; color: #2d6a4f; }
-  .score-good { background: #fff3cd; color: #7c6a0a; }
-  .score-tough { background: #fde8e8; color: #c0392b; }
+  .vote-yes { background: #d8f3dc; }
+  .vote-waiting { background: #f0f0f0; }
+  .vote-name { font-weight: 600; font-size: 14px; }
+  .vote-status { font-size: 11px; color: var(--stone); margin-top: 1px; }
   .mike-note {
     background: var(--sand); border-radius: 10px;
     padding: 10px 14px; margin-top: 14px;
     font-size: 12px; color: var(--stone); line-height: 1.4;
   }
   .mike-note strong { color: var(--bark); }
-  .best-days {
-    background: linear-gradient(135deg, var(--green) 0%, var(--green-light) 100%);
-    border-radius: 16px; padding: 20px; color: white; margin-top: 16px;
+  .pick-btn {
+    display: block; width: 100%; margin-top: 16px; padding: 14px;
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700;
+    color: white; background: var(--green); border: none; border-radius: 12px;
+    cursor: pointer; transition: all 0.2s;
   }
-  .best-days h3 {
+  .pick-btn:active { transform: scale(0.97); }
+  .pick-btn.unpick {
+    background: transparent; color: var(--orange); border: 2px solid var(--orange);
+  }
+  .progress-label { font-size: 12px; font-weight: 600; color: var(--stone); margin-bottom: 8px; }
+  .progress-bar { height: 8px; background: #e9ecef; border-radius: 4px; overflow: hidden; }
+  .progress-fill {
+    height: 100%; background: linear-gradient(90deg, var(--green), #52b788);
+    border-radius: 4px; transition: width 0.5s ease;
+  }
+  .progress-names { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .progress-chip { font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 600; }
+  .chip-voted { background: var(--green-pale); color: var(--green); }
+  .chip-waiting { background: #f0f0f0; color: #999; }
+  .celebration {
+    display: none; text-align: center;
+    padding: 30px 20px; margin: 16px;
+    background: linear-gradient(135deg, #2d6a4f 0%, #52b788 50%, #40916c 100%);
+    border-radius: 20px; color: white;
+    box-shadow: 0 8px 32px rgba(45,106,79,0.3);
+    animation: celebIn 0.5s ease;
+  }
+  .celebration.show { display: block; }
+  @keyframes celebIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .celebration .trophy { font-size: 56px; margin-bottom: 12px; }
+  .celebration h2 {
     font-family: 'Playfair Display', serif;
-    font-size: 20px; margin-bottom: 12px;
+    font-size: 24px; font-weight: 900; margin-bottom: 8px;
   }
-  .best-day-item {
-    background: rgba(255,255,255,0.15);
-    border-radius: 10px; padding: 10px 14px;
-    margin-bottom: 8px; font-size: 14px;
-    cursor: pointer;
+  .celebration .chosen-date {
+    font-size: 20px; font-weight: 700;
+    background: rgba(255,255,255,0.2); border-radius: 12px;
+    padding: 12px 20px; margin: 12px auto; display: inline-block;
   }
-  .best-day-item:last-child { margin-bottom: 0; }
-  .best-day-item .date { font-weight: 700; }
-  .best-day-item .reason { font-size: 12px; opacity: 0.8; margin-top: 2px; }
+  .celebration p { font-size: 14px; opacity: 0.85; margin-top: 10px; line-height: 1.5; }
   .tip {
     text-align: center; padding: 24px 20px;
     font-size: 12px; color: var(--stone); line-height: 1.5;
@@ -227,232 +294,365 @@
 </head>
 <body>
 
+<div class="sticky-badge" id="stickyBadge">
+  <div class="badge-avatar" id="badgeAvatar"></div>
+  <div>
+    <div class="badge-name" id="badgeName"></div>
+    <div class="badge-switch">tap to switch</div>
+  </div>
+</div>
+
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-avatar" id="confirmAvatar"></div>
+    <h3 id="confirmName"></h3>
+    <p>You'll be voting as this person. You can always switch later by tapping your name in the top-right corner.</p>
+    <div class="confirm-btns">
+      <button class="btn-cancel" id="confirmCancel">Go back</button>
+      <button class="btn-confirm" id="confirmYes">That's me!</button>
+    </div>
+  </div>
+</div>
+
 <div class="header">
   <h1>🥾 April Hike Planner</h1>
-  <p>Let's find the best day for all 5 of us!</p>
+  <p>Pick your best dates &mdash; when all 5 agree, we hike!</p>
 </div>
 
 <div class="info-bar">
-  <strong>🕚 Mike starts after 11 AM</strong> — leaves house at 11, arrives ~11:20. Plan meeting time accordingly!
+  <strong>🕚 Mike starts after 11 AM</strong> &mdash; leaves house at 11, arrives ~11:20.
 </div>
 
-<div class="section">
-  <div class="section-title">👥 The Crew & Schedules</div>
-  <div class="person-card">
-    <div class="avatar color-chris">C</div>
-    <div class="person-info">
-      <div class="person-name">Chris</div>
-      <div class="person-note">Works Tue–Sat. Free <strong>Sun & Mon</strong> — but Mon needs to be home by 4 PM</div>
+<div class="who-screen" id="whoScreen">
+  <h2>Who are you?</h2>
+  <p>Tap your name to get started.<br>Your picks will be saved and shared with the group.</p>
+  <div class="who-grid" id="whoGrid"></div>
+</div>
+
+<div class="app" id="mainApp">
+  <div class="celebration" id="celebration">
+    <div class="trophy">🏔️</div>
+    <h2>It's a Date!</h2>
+    <div class="chosen-date" id="chosenDate"></div>
+    <p>Everyone picked the same day.<br>See you on the trail! 🥾</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">👥 The Crew & Schedules</div>
+    <div class="person-card">
+      <div class="avatar-sm color-chris">C</div>
+      <div class="person-info">
+        <div class="person-name">Chris</div>
+        <div class="person-note">Works Tue–Sat. Free <strong>Sun & Mon</strong> — Mon home by 4 PM</div>
+      </div>
+    </div>
+    <div class="person-card">
+      <div class="avatar-sm color-yegor">Y</div>
+      <div class="person-info">
+        <div class="person-name">Yegor</div>
+        <div class="person-note">Poker on <strong>Sundays</strong> — can skip sometimes</div>
+      </div>
+    </div>
+    <div class="person-card">
+      <div class="avatar-sm color-eli">E</div>
+      <div class="person-info">
+        <div class="person-name">Eli</div>
+        <div class="person-note">School on <strong>Mondays</strong> — can skip sometimes</div>
+      </div>
+    </div>
+    <div class="person-card">
+      <div class="avatar-sm color-kevin">K</div>
+      <div class="person-info">
+        <div class="person-name">Kevin</div>
+        <div class="person-note">Prefers <strong>weekdays</strong> — can do Sundays sometimes</div>
+      </div>
+    </div>
+    <div class="person-card">
+      <div class="avatar-sm color-mike">M</div>
+      <div class="person-info">
+        <div class="person-name">Mike</div>
+        <div class="person-note">Starts after <strong>11 AM</strong> — 20 min drive to meeting spot</div>
+      </div>
     </div>
   </div>
-  <div class="person-card">
-    <div class="avatar color-yegor">Y</div>
-    <div class="person-info">
-      <div class="person-name">Yegor</div>
-      <div class="person-note">Poker tournaments on <strong>Sundays</strong> — can skip sometimes</div>
+
+  <div class="section">
+    <div class="section-title">📅 April 2026 — Tap to vote</div>
+    <div class="calendar-wrapper">
+      <div class="cal-header">
+        <span>SUN</span><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#2d6a4f"></div> Your pick</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#e76f51"></div><div class="legend-dot" style="background:#264653"></div> Others' picks</div>
+        <div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,#f9c74f,#f8961e)"></div> All 5 agree!</div>
+      </div>
     </div>
+    <div class="day-detail" id="dayDetail"></div>
   </div>
-  <div class="person-card">
-    <div class="avatar color-eli">E</div>
-    <div class="person-info">
-      <div class="person-name">Eli</div>
-      <div class="person-note">School on <strong>Mondays</strong> — can skip sometimes</div>
-    </div>
-  </div>
-  <div class="person-card">
-    <div class="avatar color-kevin">K</div>
-    <div class="person-info">
-      <div class="person-name">Kevin</div>
-      <div class="person-note">Prefers <strong>weekdays</strong> (probably) — can do Sundays sometimes</div>
-    </div>
-  </div>
-  <div class="person-card">
-    <div class="avatar color-mike">M</div>
-    <div class="person-info">
-      <div class="person-name">Mike</div>
-      <div class="person-note">Starts after <strong>11 AM</strong> only — 20 min drive to meeting spot</div>
-    </div>
+
+  <div class="tip">
+    Tap a date to vote for it. You can pick multiple dates.<br>
+    When all 5 of us agree on a day, the hike is on!
   </div>
 </div>
 
-<div class="section">
-  <div class="section-title">📅 April 2026 — Tap a day</div>
-  <div class="calendar-wrapper">
-    <div class="cal-header">
-      <span>SUN</span><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span>
-    </div>
-    <div class="cal-grid" id="calGrid"></div>
-    <div class="legend">
-      <div class="legend-item"><div class="legend-dot" style="background:#2d6a4f"></div> Great for all</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#e9c46a"></div> Possible (some may skip)</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#ddd"></div> Hard day</div>
-    </div>
-  </div>
-  <div class="day-detail" id="dayDetail"></div>
-  <div class="best-days" id="bestDays">
-    <h3>🏆 Best Days</h3>
-    <div id="bestDaysList"></div>
-  </div>
-</div>
-
-<div class="tip">
-  Tap any date above to see everyone's availability.<br>
-  Sundays &amp; Mondays are our best bet since Chris is off!
-</div>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
 (function() {
-  var people = [
-    { name: 'Chris', key: 'chris' },
-    { name: 'Yegor', key: 'yegor' },
-    { name: 'Eli', key: 'eli' },
-    { name: 'Kevin', key: 'kevin' },
-    { name: 'Mike', key: 'mike' }
+  var firebaseConfig = {
+    apiKey: "AIzaSyAwRj4LvvfyxQJVGdeIvs7xt5WhnJltoxU",
+    authDomain: "april-hike-planner.firebaseapp.com",
+    databaseURL: "https://april-hike-planner-default-rtdb.firebaseio.com",
+    projectId: "april-hike-planner",
+    storageBucket: "april-hike-planner.firebasestorage.app",
+    messagingSenderId: "620356069115",
+    appId: "1:620356069115:web:d62d6b43cc574179cdf25e"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  var db = firebase.database();
+  var votesRef = db.ref('votes');
+
+  var PEOPLE = [
+    { name: 'Chris', key: 'chris', initial: 'C', colorClass: 'color-chris', color: '#e76f51', note: 'Works Tue\u2013Sat \u00B7 Free Sun & Mon' },
+    { name: 'Yegor', key: 'yegor', initial: 'Y', colorClass: 'color-yegor', color: '#264653', note: 'Poker tournaments on Sundays' },
+    { name: 'Eli', key: 'eli', initial: 'E', colorClass: 'color-eli', color: '#2a9d8f', note: 'School on Mondays' },
+    { name: 'Kevin', key: 'kevin', initial: 'K', colorClass: 'color-kevin', color: '#e9c46a', note: 'Prefers weekdays' },
+    { name: 'Mike', key: 'mike', initial: 'M', colorClass: 'color-mike', color: '#7b2cbf', note: 'Starts after 11 AM only' }
   ];
 
-  function getAvailability(dow) {
-    var a = {};
-    if (dow === 0) a.chris = { status: 'yes', note: 'Day off \u2014 fully free' };
-    else if (dow === 1) a.chris = { status: 'yes', note: 'Day off \u2014 but needs to be home by 4 PM' };
-    else a.chris = { status: 'no', note: 'Working' };
+  var START_DOW = 3;
+  var DAYS_IN_MONTH = 30;
+  var currentUser = null;
+  var pendingUser = null;
+  var allVotes = {};
 
-    if (dow === 0) a.yegor = { status: 'maybe', note: 'Poker tournament \u2014 can skip if needed' };
-    else a.yegor = { status: 'yes', note: 'Free' };
-
-    if (dow === 1) a.eli = { status: 'maybe', note: 'School \u2014 can skip if needed' };
-    else a.eli = { status: 'yes', note: 'Free' };
-
-    if (dow >= 1 && dow <= 5) a.kevin = { status: 'yes', note: 'Prefers weekdays \u2014 good' };
-    else if (dow === 0) a.kevin = { status: 'maybe', note: 'Can do Sundays sometimes' };
-    else a.kevin = { status: 'maybe', note: 'Weekend \u2014 less preferred' };
-
-    a.mike = { status: 'yes', note: 'Available \u2014 departs 11 AM, arrives 11:20' };
-    return a;
-  }
-
-  function getScore(dow) {
-    var avail = getAvailability(dow);
-    var yes = 0, maybe = 0, no = 0;
-    for (var k in avail) {
-      if (avail[k].status === 'yes') yes++;
-      else if (avail[k].status === 'maybe') maybe++;
-      else no++;
+  function getPerson(key) {
+    for (var i = 0; i < PEOPLE.length; i++) {
+      if (PEOPLE[i].key === key) return PEOPLE[i];
     }
-    return { yes: yes, maybe: maybe, no: no };
+    return null;
   }
 
-  function selectDay(day, dow) {
-    var prev = document.querySelectorAll('.cal-day.selected');
-    for (var p = 0; p < prev.length; p++) prev[p].classList.remove('selected');
-    var el = document.querySelector('.cal-day[data-day="' + day + '"]');
-    if (el) el.classList.add('selected');
+  function buildWhoScreen() {
+    var grid = document.getElementById('whoGrid');
+    var html = '';
+    for (var i = 0; i < PEOPLE.length; i++) {
+      var p = PEOPLE[i];
+      html += '<button class="who-btn" data-key="' + p.key + '">' +
+        '<div class="avatar ' + p.colorClass + '">' + p.initial + '</div>' +
+        '<div class="who-right"><div class="who-fullname">' + p.name + '</div>' +
+        '<div class="who-note">' + p.note + '</div></div></button>';
+    }
+    grid.innerHTML = html;
+    var btns = grid.querySelectorAll('.who-btn');
+    for (var b = 0; b < btns.length; b++) {
+      (function(btn) {
+        btn.addEventListener('click', function() {
+          showConfirm(btn.getAttribute('data-key'));
+        });
+      })(btns[b]);
+    }
+  }
 
-    var avail = getAvailability(dow);
-    var score = getScore(dow);
+  function showConfirm(key) {
+    pendingUser = key;
+    var p = getPerson(key);
+    document.getElementById('confirmAvatar').className = 'confirm-avatar ' + p.colorClass;
+    document.getElementById('confirmAvatar').textContent = p.initial;
+    document.getElementById('confirmName').textContent = 'Continue as ' + p.name + '?';
+    document.getElementById('confirmOverlay').className = 'confirm-overlay show';
+  }
+
+  document.getElementById('confirmCancel').addEventListener('click', function() {
+    pendingUser = null;
+    document.getElementById('confirmOverlay').className = 'confirm-overlay';
+  });
+
+  document.getElementById('confirmYes').addEventListener('click', function() {
+    document.getElementById('confirmOverlay').className = 'confirm-overlay';
+    currentUser = pendingUser;
+    pendingUser = null;
+    localStorage.setItem('hike_user', currentUser);
+    enterApp();
+  });
+
+  function updateStickyBadge() {
+    var badge = document.getElementById('stickyBadge');
+    if (!currentUser) { badge.className = 'sticky-badge'; return; }
+    var p = getPerson(currentUser);
+    document.getElementById('badgeAvatar').className = 'badge-avatar ' + p.colorClass;
+    document.getElementById('badgeAvatar').textContent = p.initial;
+    document.getElementById('badgeName').textContent = p.name;
+    badge.className = 'sticky-badge show';
+  }
+
+  document.getElementById('stickyBadge').addEventListener('click', function() {
+    currentUser = null;
+    localStorage.removeItem('hike_user');
+    updateStickyBadge();
+    document.getElementById('mainApp').className = 'app';
+    document.getElementById('whoScreen').style.display = '';
+    document.getElementById('dayDetail').className = 'day-detail';
+  });
+
+  function enterApp() {
+    document.getElementById('whoScreen').style.display = 'none';
+    document.getElementById('mainApp').className = 'app show';
+    updateStickyBadge();
+    buildCalendar();
+    listenForVotes();
+  }
+
+  function buildCalendar() {
+    var grid = document.getElementById('calGrid');
+    var today = new Date();
+    var html = '';
+    for (var i = 0; i < START_DOW; i++) {
+      html += '<div class="cal-day empty"></div>';
+    }
+    for (var d = 1; d <= DAYS_IN_MONTH; d++) {
+      var dow = (START_DOW + d - 1) % 7;
+      var date = new Date(2026, 3, d);
+      var isPast = date < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      var cls = 'cal-day';
+      if (isPast) cls += ' past';
+      if (dow === 0) cls += ' sunday';
+      if (dow === 1) cls += ' monday';
+      html += '<div class="' + cls + '" data-day="' + d + '" data-dow="' + dow + '">' +
+        '<span>' + d + '</span><div class="dots" id="dots-' + d + '"></div></div>';
+    }
+    grid.innerHTML = html;
+    var cells = grid.querySelectorAll('.cal-day:not(.empty):not(.past)');
+    for (var c = 0; c < cells.length; c++) {
+      (function(cell) {
+        cell.addEventListener('click', function() {
+          showDayDetail(parseInt(cell.getAttribute('data-day')), parseInt(cell.getAttribute('data-dow')));
+        });
+      })(cells[c]);
+    }
+  }
+
+  function listenForVotes() {
+    votesRef.on('value', function(snapshot) {
+      allVotes = snapshot.val() || {};
+      updateCalendarDots();
+      checkForWinner();
+      var detail = document.getElementById('dayDetail');
+      if (detail.classList.contains('show') && detail.getAttribute('data-day')) {
+        showDayDetail(parseInt(detail.getAttribute('data-day')), parseInt(detail.getAttribute('data-dow')));
+      }
+    });
+  }
+
+  function updateCalendarDots() {
+    for (var d = 1; d <= DAYS_IN_MONTH; d++) {
+      var voters = allVotes['day_' + d] || {};
+      var dotsEl = document.getElementById('dots-' + d);
+      var cell = document.querySelector('.cal-day[data-day="' + d + '"]');
+      if (!dotsEl || !cell) continue;
+      var html = '';
+      var voterCount = 0;
+      var myPick = false;
+      for (var i = 0; i < PEOPLE.length; i++) {
+        if (voters[PEOPLE[i].key]) {
+          html += '<div class="dot" style="background:' + PEOPLE[i].color + '"></div>';
+          voterCount++;
+          if (PEOPLE[i].key === currentUser) myPick = true;
+        }
+      }
+      dotsEl.innerHTML = html;
+      cell.classList.remove('my-pick', 'all-picked');
+      if (voterCount === 5) cell.classList.add('all-picked');
+      else if (myPick) cell.classList.add('my-pick');
+    }
+  }
+
+  function checkForWinner() {
+    var celeb = document.getElementById('celebration');
+    var found = null;
+    for (var d = 1; d <= DAYS_IN_MONTH; d++) {
+      var voters = allVotes['day_' + d] || {};
+      var count = 0;
+      for (var i = 0; i < PEOPLE.length; i++) {
+        if (voters[PEOPLE[i].key]) count++;
+      }
+      if (count === 5) { found = d; break; }
+    }
+    if (found) {
+      var dow = (START_DOW + found - 1) % 7;
+      var dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      document.getElementById('chosenDate').textContent = dayNames[dow] + ', April ' + found + ', 2026';
+      celeb.className = 'celebration show';
+    } else {
+      celeb.className = 'celebration';
+    }
+  }
+
+  function showDayDetail(day, dow) {
+    var voters = allVotes['day_' + day] || {};
     var dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-
-    var badge = '';
-    if (score.no > 0) badge = '<span class="score-badge score-tough">\u274C Someone can\'t make it</span>';
-    else if (score.yes === 5) badge = '<span class="score-badge score-great">\u2705 Everyone free!</span>';
-    else badge = '<span class="score-badge score-good">\u26A0\uFE0F ' + score.maybe + ' might need to skip something</span>';
+    var myVoted = !!voters[currentUser];
+    var voterCount = 0;
+    for (var k in voters) { if (voters[k]) voterCount++; }
 
     var rows = '';
-    for (var i = 0; i < people.length; i++) {
-      var pr = people[i];
-      var a = avail[pr.key];
-      var iconClass = 'avail-yes', icon = '\u2705';
-      if (a.status === 'maybe') { iconClass = 'avail-maybe'; icon = '\uD83E\uDD14'; }
-      if (a.status === 'no') { iconClass = 'avail-no'; icon = '\u274C'; }
-      rows += '<div class="availability-row"><div class="avail-icon ' + iconClass + '">' + icon + '</div><div><div class="avail-name">' + pr.name + '</div><div class="avail-note">' + a.note + '</div></div></div>';
+    for (var i = 0; i < PEOPLE.length; i++) {
+      var p = PEOPLE[i];
+      var voted = !!voters[p.key];
+      var isMe = p.key === currentUser;
+      rows += '<div class="vote-row"><div class="vote-icon ' + (voted ? 'vote-yes' : 'vote-waiting') + '">' +
+        (voted ? '\u2705' : '\u23F3') + '</div><div><div class="vote-name">' + p.name +
+        (isMe ? ' (you)' : '') + '</div><div class="vote-status">' +
+        (voted ? 'Picked this day!' : 'Hasn\u2019t picked yet') + '</div></div></div>';
     }
 
     var mikeNote = '';
     if (dow === 1) {
-      mikeNote = '<div class="mike-note"><strong>\u23F0 Monday timing:</strong> Mike leaves at 11, arrives ~11:20. Chris needs to be home by 4 PM. That gives us roughly <strong>11:20 AM \u2013 3:00 PM</strong> for the hike (with travel buffer for Chris).</div>';
+      mikeNote = '<div class="mike-note"><strong>\u23F0 Monday timing:</strong> Mike arrives ~11:20. Chris home by 4 PM. Window: <strong>11:20 AM \u2013 3:00 PM</strong></div>';
+    } else if (dow === 0) {
+      mikeNote = '<div class="mike-note"><strong>\u23F0 Sunday:</strong> Full day! Mike arrives ~11:20. No rush.</div>';
     } else {
-      mikeNote = '<div class="mike-note"><strong>\u23F0 Reminder:</strong> Mike leaves house at 11 AM and arrives at the meeting spot around 11:20. Plan start time accordingly!</div>';
+      mikeNote = '<div class="mike-note"><strong>\u26A0\uFE0F Heads up:</strong> Chris works this day (Tue\u2013Sat).</div>';
     }
 
+    var progressHtml = '<div style="margin-top:14px"><div class="progress-label">' + voterCount + ' of 5 picked this day</div>' +
+      '<div class="progress-bar"><div class="progress-fill" style="width:' + (voterCount * 20) + '%"></div></div>' +
+      '<div class="progress-names">';
+    for (var j = 0; j < PEOPLE.length; j++) {
+      var pj = PEOPLE[j];
+      progressHtml += '<span class="progress-chip ' + (voters[pj.key] ? 'chip-voted' : 'chip-waiting') + '">' + pj.name + '</span>';
+    }
+    progressHtml += '</div></div>';
+
+    var btnText = myVoted ? '\u274C Remove my pick' : '\u2705 Pick this day';
+    var btnClass = myVoted ? 'pick-btn unpick' : 'pick-btn';
+
     var detail = document.getElementById('dayDetail');
-    detail.innerHTML = '<h3>' + dayNames[dow] + '</h3><div class="day-type">April ' + day + ', 2026</div>' + badge + rows + mikeNote;
+    detail.setAttribute('data-day', day);
+    detail.setAttribute('data-dow', dow);
+    detail.innerHTML = '<h3>' + dayNames[dow] + '</h3><div class="day-type">April ' + day + ', 2026</div>' +
+      rows + progressHtml + mikeNote +
+      '<button class="' + btnClass + '" id="pickBtn">' + btnText + '</button>';
     detail.className = 'day-detail show';
+
+    document.getElementById('pickBtn').addEventListener('click', function() {
+      var ref = votesRef.child('day_' + day).child(currentUser);
+      if (voters[currentUser]) { ref.remove(); } else { ref.set(true); }
+    });
+
     setTimeout(function() { detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 50);
   }
 
-  // Build calendar
-  var grid = document.getElementById('calGrid');
-  var startDay = 3; // April 1 2026 = Wednesday
-  var today = new Date();
-  var html = '';
-
-  for (var i = 0; i < startDay; i++) {
-    html += '<div class="cal-day empty"></div>';
-  }
-
-  for (var d = 1; d <= 30; d++) {
-    var dow = (startDay + d - 1) % 7;
-    var date = new Date(2026, 3, d);
-    var isPast = date < new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    var score = getScore(dow);
-    var dotColor = '#ddd';
-    if (score.no === 0 && score.maybe === 0) dotColor = '#2d6a4f';
-    else if (score.no === 0) dotColor = '#e9c46a';
-
-    var cls = 'cal-day';
-    if (isPast) cls += ' past';
-    if (dow === 0) cls += ' sunday';
-    if (dow === 1) cls += ' monday';
-
-    html += '<div class="' + cls + '" data-day="' + d + '" data-dow="' + dow + '">' + d + '<div class="dot" style="background:' + (isPast ? '#eee' : dotColor) + '"></div></div>';
-  }
-  grid.innerHTML = html;
-
-  var cells = grid.querySelectorAll('.cal-day:not(.empty):not(.past)');
-  for (var c = 0; c < cells.length; c++) {
-    (function(cell) {
-      cell.addEventListener('click', function() {
-        selectDay(parseInt(cell.getAttribute('data-day')), parseInt(cell.getAttribute('data-dow')));
-      });
-    })(cells[c]);
-  }
-
-  // Build best days
-  var list = document.getElementById('bestDaysList');
-  var ranked = [];
-  for (var d2 = 1; d2 <= 30; d2++) {
-    var dow2 = (startDay + d2 - 1) % 7;
-    var date2 = new Date(2026, 3, d2);
-    if (date2 < new Date(today.getFullYear(), today.getMonth(), today.getDate())) continue;
-    var sc = getScore(dow2);
-    if (sc.no === 0) ranked.push({ day: d2, dow: dow2, score: sc });
-  }
-  ranked.sort(function(a, b) {
-    if (b.score.yes !== a.score.yes) return b.score.yes - a.score.yes;
-    return a.score.maybe - b.score.maybe;
-  });
-
-  var dn = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  var top = ranked.slice(0, 6);
-  var bhtml = '';
-  for (var t = 0; t < top.length; t++) {
-    var r = top[t];
-    var reason = '';
-    if (r.score.yes === 5) reason = 'Everyone fully free!';
-    else if (r.dow === 0) reason = 'Yegor & Kevin might need to adjust';
-    else if (r.dow === 1) reason = 'Eli might skip school \u00B7 Chris home by 4 PM';
-    else reason = r.score.maybe + ' person(s) might adjust';
-    bhtml += '<div class="best-day-item" data-day="' + r.day + '" data-dow="' + r.dow + '"><div class="date">' + dn[r.dow] + ', April ' + r.day + '</div><div class="reason">' + r.score.yes + '/5 confirmed \u00B7 ' + reason + '</div></div>';
-  }
-  list.innerHTML = bhtml;
-
-  var items = list.querySelectorAll('.best-day-item');
-  for (var j = 0; j < items.length; j++) {
-    (function(item) {
-      item.addEventListener('click', function() {
-        selectDay(parseInt(item.getAttribute('data-day')), parseInt(item.getAttribute('data-dow')));
-        document.getElementById('calGrid').scrollIntoView({ behavior: 'smooth', block: 'center' });
-      });
-    })(items[j]);
+  buildWhoScreen();
+  var saved = localStorage.getItem('hike_user');
+  if (saved && getPerson(saved)) {
+    currentUser = saved;
+    enterApp();
   }
 })();
 </script>
