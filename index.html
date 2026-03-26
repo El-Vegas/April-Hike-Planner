@@ -171,7 +171,7 @@
   }
   .cal-day.empty, .cal-day.past { cursor: default; }
   .cal-day.past { color: #ccc; }
-  .cal-day:not(.empty):not(.past):active { transform: scale(0.92); }
+  .cal-day:not(.empty):not(.past):active { transform: scale(0.88); }
   .cal-day .dots {
     display: flex; gap: 2px; margin-top: 2px; min-height: 7px; flex-wrap: wrap;
     justify-content: center; max-width: 36px;
@@ -193,6 +193,20 @@
     from { box-shadow: 0 0 4px rgba(249,199,79,0.4); }
     to { box-shadow: 0 0 12px rgba(249,199,79,0.8); }
   }
+
+  /* Toast notification */
+  .toast {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+    background: var(--bark); color: white; padding: 10px 20px;
+    border-radius: 30px; font-size: 13px; font-weight: 600;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25); z-index: 999;
+    opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none; white-space: nowrap;
+  }
+  .toast.show {
+    opacity: 1; transform: translateX(-50%) translateY(0);
+  }
+
   .legend {
     display: flex; flex-wrap: wrap; gap: 10px;
     padding: 14px 16px; background: var(--mist);
@@ -203,6 +217,8 @@
     font-size: 11px; color: var(--stone);
   }
   .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* Detail panel (tap the ℹ️ or long-press) */
   .day-detail {
     background: var(--white); border-radius: 16px;
     box-shadow: var(--shadow); padding: 20px; margin-top: 16px;
@@ -237,16 +253,6 @@
     font-size: 12px; color: var(--stone); line-height: 1.4;
   }
   .mike-note strong { color: var(--bark); }
-  .pick-btn {
-    display: block; width: 100%; margin-top: 16px; padding: 14px;
-    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 700;
-    color: white; background: var(--green); border: none; border-radius: 12px;
-    cursor: pointer; transition: all 0.2s;
-  }
-  .pick-btn:active { transform: scale(0.97); }
-  .pick-btn.unpick {
-    background: transparent; color: var(--orange); border: 2px solid var(--orange);
-  }
   .progress-label { font-size: 12px; font-weight: 600; color: var(--stone); margin-bottom: 8px; }
   .progress-bar { height: 8px; background: #e9ecef; border-radius: 4px; overflow: hidden; }
   .progress-fill {
@@ -257,6 +263,14 @@
   .progress-chip { font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 600; }
   .chip-voted { background: var(--green-pale); color: var(--green); }
   .chip-waiting { background: #f0f0f0; color: #999; }
+  .detail-close {
+    float: right; background: #f0f0f0; border: none; border-radius: 50%;
+    width: 28px; height: 28px; font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--stone); font-family: 'DM Sans', sans-serif;
+  }
+  .detail-close:active { transform: scale(0.9); }
+
   .celebration {
     display: none; text-align: center;
     padding: 30px 20px; margin: 16px;
@@ -290,6 +304,14 @@
   .color-eli { background: #2a9d8f; }
   .color-kevin { background: #e9c46a; }
   .color-mike { background: #7b2cbf; }
+
+  /* Instruction hint */
+  .tap-hint {
+    text-align: center; padding: 10px 16px;
+    font-size: 12px; color: var(--green); font-weight: 600;
+    background: var(--green-pale); border-radius: 10px;
+    margin-bottom: 14px;
+  }
 </style>
 </head>
 <body>
@@ -306,13 +328,16 @@
   <div class="confirm-box">
     <div class="confirm-avatar" id="confirmAvatar"></div>
     <h3 id="confirmName"></h3>
-    <p>You'll be voting as this person. You can always switch later by tapping your name in the top-right corner.</p>
+    <p>You'll be voting as this person. You can switch later by tapping your name in the top-right corner.</p>
     <div class="confirm-btns">
       <button class="btn-cancel" id="confirmCancel">Go back</button>
       <button class="btn-confirm" id="confirmYes">That's me!</button>
     </div>
   </div>
 </div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
 
 <div class="header">
   <h1>🥾 April Hike Planner</h1>
@@ -377,7 +402,8 @@
   </div>
 
   <div class="section">
-    <div class="section-title">📅 April 2026 — Tap to vote</div>
+    <div class="section-title">📅 April 2026 — Tap dates to vote</div>
+    <div class="tap-hint" id="tapHint">👆 Tap any date to pick it &mdash; tap again to remove</div>
     <div class="calendar-wrapper">
       <div class="cal-header">
         <span>SUN</span><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span>
@@ -393,7 +419,7 @@
   </div>
 
   <div class="tip">
-    Tap a date to vote for it. You can pick multiple dates.<br>
+    Tap dates to pick/unpick instantly. Tap a date with dots to see who picked it.<br>
     When all 5 of us agree on a day, the hike is on!
   </div>
 </div>
@@ -430,6 +456,7 @@
   var currentUser = null;
   var pendingUser = null;
   var allVotes = {};
+  var toastTimer = null;
 
   function getPerson(key) {
     for (var i = 0; i < PEOPLE.length; i++) {
@@ -438,6 +465,16 @@
     return null;
   }
 
+  // ===== TOAST =====
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show';
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function() { t.className = 'toast'; }, 1500);
+  }
+
+  // ===== WHO SCREEN =====
   function buildWhoScreen() {
     var grid = document.getElementById('whoGrid');
     var html = '';
@@ -481,6 +518,7 @@
     enterApp();
   });
 
+  // ===== STICKY BADGE =====
   function updateStickyBadge() {
     var badge = document.getElementById('stickyBadge');
     if (!currentUser) { badge.className = 'sticky-badge'; return; }
@@ -500,6 +538,7 @@
     document.getElementById('dayDetail').className = 'day-detail';
   });
 
+  // ===== ENTER APP =====
   function enterApp() {
     document.getElementById('whoScreen').style.display = 'none';
     document.getElementById('mainApp').className = 'app show';
@@ -508,6 +547,7 @@
     listenForVotes();
   }
 
+  // ===== CALENDAR =====
   function buildCalendar() {
     var grid = document.getElementById('calGrid');
     var today = new Date();
@@ -527,16 +567,59 @@
         '<span>' + d + '</span><div class="dots" id="dots-' + d + '"></div></div>';
     }
     grid.innerHTML = html;
+
     var cells = grid.querySelectorAll('.cal-day:not(.empty):not(.past)');
     for (var c = 0; c < cells.length; c++) {
       (function(cell) {
-        cell.addEventListener('click', function() {
-          showDayDetail(parseInt(cell.getAttribute('data-day')), parseInt(cell.getAttribute('data-dow')));
+        var pressTimer = null;
+        var didLongPress = false;
+
+        // Quick tap = toggle vote
+        cell.addEventListener('click', function(e) {
+          if (didLongPress) { didLongPress = false; return; }
+          var day = parseInt(cell.getAttribute('data-day'));
+          toggleVote(day);
         });
+
+        // Long press = show detail panel
+        cell.addEventListener('touchstart', function(e) {
+          didLongPress = false;
+          pressTimer = setTimeout(function() {
+            didLongPress = true;
+            var day = parseInt(cell.getAttribute('data-day'));
+            var dow = parseInt(cell.getAttribute('data-dow'));
+            showDayDetail(day, dow);
+          }, 500);
+        }, { passive: true });
+
+        cell.addEventListener('touchend', function() { clearTimeout(pressTimer); });
+        cell.addEventListener('touchmove', function() { clearTimeout(pressTimer); });
       })(cells[c]);
     }
   }
 
+  // ===== TOGGLE VOTE (instant) =====
+  function toggleVote(day) {
+    var dayKey = 'day_' + day;
+    var voters = allVotes[dayKey] || {};
+    var ref = votesRef.child(dayKey).child(currentUser);
+    var dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    var dow = (START_DOW + day - 1) % 7;
+
+    if (voters[currentUser]) {
+      ref.remove();
+      showToast('\u274C Removed April ' + day + ' (' + dayNames[dow] + ')');
+    } else {
+      ref.set(true);
+      showToast('\u2705 Picked April ' + day + ' (' + dayNames[dow] + ')');
+    }
+
+    // Hide hint after first vote
+    var hint = document.getElementById('tapHint');
+    if (hint) hint.style.display = 'none';
+  }
+
+  // ===== REALTIME VOTES =====
   function listenForVotes() {
     votesRef.on('value', function(snapshot) {
       allVotes = snapshot.val() || {};
@@ -593,10 +676,10 @@
     }
   }
 
+  // ===== DAY DETAIL (long-press to see who picked) =====
   function showDayDetail(day, dow) {
     var voters = allVotes['day_' + day] || {};
     var dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-    var myVoted = !!voters[currentUser];
     var voterCount = 0;
     for (var k in voters) { if (voters[k]) voterCount++; }
 
@@ -629,25 +712,22 @@
     }
     progressHtml += '</div></div>';
 
-    var btnText = myVoted ? '\u274C Remove my pick' : '\u2705 Pick this day';
-    var btnClass = myVoted ? 'pick-btn unpick' : 'pick-btn';
-
     var detail = document.getElementById('dayDetail');
     detail.setAttribute('data-day', day);
     detail.setAttribute('data-dow', dow);
-    detail.innerHTML = '<h3>' + dayNames[dow] + '</h3><div class="day-type">April ' + day + ', 2026</div>' +
-      rows + progressHtml + mikeNote +
-      '<button class="' + btnClass + '" id="pickBtn">' + btnText + '</button>';
+    detail.innerHTML = '<button class="detail-close" id="detailClose">\u2715</button>' +
+      '<h3>' + dayNames[dow] + '</h3><div class="day-type">April ' + day + ', 2026</div>' +
+      rows + progressHtml + mikeNote;
     detail.className = 'day-detail show';
 
-    document.getElementById('pickBtn').addEventListener('click', function() {
-      var ref = votesRef.child('day_' + day).child(currentUser);
-      if (voters[currentUser]) { ref.remove(); } else { ref.set(true); }
+    document.getElementById('detailClose').addEventListener('click', function() {
+      detail.className = 'day-detail';
     });
 
     setTimeout(function() { detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 50);
   }
 
+  // ===== INIT =====
   buildWhoScreen();
   var saved = localStorage.getItem('hike_user');
   if (saved && getPerson(saved)) {
