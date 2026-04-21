@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>April Hike Planner 🥾</title>
+<title>May-Hike-Planner 🥾</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -304,6 +304,7 @@
   .color-eli { background: #2a9d8f; }
   .color-kevin { background: #e9c46a; }
   .color-mike { background: #7b2cbf; }
+  .color-justin { background: #577590; }
 
   /* Instruction hint */
   .tap-hint {
@@ -340,8 +341,8 @@
 <div class="toast" id="toast"></div>
 
 <div class="header">
-  <h1>🥾 April Hike Planner</h1>
-  <p>Pick your best dates &mdash; when all 5 agree, we hike!</p>
+  <h1>🥾 May-Hike-Planner</h1>
+  <p>Pick your best dates &mdash; when all 6 agree, we hike!</p>
 </div>
 
 <div class="info-bar">
@@ -382,7 +383,14 @@
       <div class="avatar-sm color-eli">E</div>
       <div class="person-info">
         <div class="person-name">Eli</div>
-        <div class="person-note">School on <strong>Mondays</strong> — can skip sometimes</div>
+        <div class="person-note">Free as a bird.</div>
+      </div>
+    </div>
+    <div class="person-card">
+      <div class="avatar-sm color-justin">J</div>
+      <div class="person-info">
+        <div class="person-name">Justin</div>
+        <div class="person-note">Free as a bird.</div>
       </div>
     </div>
     <div class="person-card">
@@ -402,7 +410,7 @@
   </div>
 
   <div class="section">
-    <div class="section-title">📅 April 2026 — Tap dates to vote</div>
+    <div class="section-title">📅 May 2026 — Tap dates to vote</div>
     <div class="tap-hint" id="tapHint">👆 Tap any date to pick it &mdash; tap again to remove</div>
     <div class="calendar-wrapper">
       <div class="cal-header">
@@ -416,7 +424,7 @@
 
   <div class="tip">
     Tap dates to pick/unpick instantly.<br>
-    When all 5 of us agree on a day, the hike is on!
+    When all 6 of us agree on a day, the hike is on!
   </div>
 </div>
 
@@ -442,13 +450,14 @@
   var PEOPLE = [
     { name: 'Chris', key: 'chris', initial: 'C', colorClass: 'color-chris', color: '#e76f51', note: 'Works Tue\u2013Sat \u00B7 Free Sun & Mon' },
     { name: 'Yegor', key: 'yegor', initial: 'Y', colorClass: 'color-yegor', color: '#264653', note: 'Poker tournaments on Sundays' },
-    { name: 'Eli', key: 'eli', initial: 'E', colorClass: 'color-eli', color: '#2a9d8f', note: 'School on Mondays' },
+    { name: 'Eli', key: 'eli', initial: 'E', colorClass: 'color-eli', color: '#2a9d8f', note: 'Free as a bird.' },
+    { name: 'Justin', key: 'justin', initial: 'J', colorClass: 'color-justin', color: '#577590', note: 'Free as a bird.' },
     { name: 'Kevin', key: 'kevin', initial: 'K', colorClass: 'color-kevin', color: '#e9c46a', note: 'Prefers weekdays' },
     { name: 'Mike', key: 'mike', initial: 'M', colorClass: 'color-mike', color: '#7b2cbf', note: 'Starts after 11 AM only' }
   ];
 
-  var START_DOW = 3;
-  var DAYS_IN_MONTH = 30;
+  var START_DOW = 5;
+  var DAYS_IN_MONTH = 31;
   var currentUser = null;
   var pendingUser = null;
   var allVotes = {};
@@ -553,7 +562,7 @@
     }
     for (var d = 1; d <= DAYS_IN_MONTH; d++) {
       var dow = (START_DOW + d - 1) % 7;
-      var date = new Date(2026, 3, d);
+      var date = new Date(2026, 4, d);
       var isPast = date < new Date(today.getFullYear(), today.getMonth(), today.getDate());
       var cls = 'cal-day';
       if (isPast) cls += ' past';
@@ -604,10 +613,10 @@
 
     if (voters[currentUser]) {
       ref.remove();
-      showToast('\u274C Removed April ' + day + ' (' + dayNames[dow] + ')');
+      showToast('\u274C Removed May ' + day + ' (' + dayNames[dow] + ')');
     } else {
       ref.set(true);
-      showToast('\u2705 Picked April ' + day + ' (' + dayNames[dow] + ')');
+      showToast('\u2705 Picked May ' + day + ' (' + dayNames[dow] + ')');
     }
 
     // Hide hint after first vote
@@ -646,7 +655,7 @@
       }
       dotsEl.innerHTML = html;
       cell.classList.remove('my-pick', 'all-picked');
-      if (voterCount === 5) cell.classList.add('all-picked');
+      if (voterCount === PEOPLE.length) cell.classList.add('all-picked');
       else if (myPick) cell.classList.add('my-pick');
     }
   }
@@ -660,12 +669,12 @@
       for (var i = 0; i < PEOPLE.length; i++) {
         if (voters[PEOPLE[i].key]) count++;
       }
-      if (count === 5) { found = d; break; }
+      if (count === PEOPLE.length) { found = d; break; }
     }
     if (found) {
       var dow = (START_DOW + found - 1) % 7;
       var dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-      document.getElementById('chosenDate').textContent = dayNames[dow] + ', April ' + found + ', 2026';
+      document.getElementById('chosenDate').textContent = dayNames[dow] + ', May ' + found + ', 2026';
       celeb.className = 'celebration show';
     } else {
       celeb.className = 'celebration';
@@ -699,8 +708,8 @@
       mikeNote = '<div class="mike-note"><strong>\u26A0\uFE0F Heads up:</strong> Chris works this day (Tue\u2013Sat).</div>';
     }
 
-    var progressHtml = '<div style="margin-top:14px"><div class="progress-label">' + voterCount + ' of 5 picked this day</div>' +
-      '<div class="progress-bar"><div class="progress-fill" style="width:' + (voterCount * 20) + '%"></div></div>' +
+    var progressHtml = '<div style="margin-top:14px"><div class="progress-label">' + voterCount + ' of ' + PEOPLE.length + ' picked this day</div>' +
+      '<div class="progress-bar"><div class="progress-fill" style="width:' + (voterCount * 100 / PEOPLE.length) + '%"></div></div>' +
       '<div class="progress-names">';
     for (var j = 0; j < PEOPLE.length; j++) {
       var pj = PEOPLE[j];
@@ -712,7 +721,7 @@
     detail.setAttribute('data-day', day);
     detail.setAttribute('data-dow', dow);
     detail.innerHTML = '<button class="detail-close" id="detailClose">\u2715</button>' +
-      '<h3>' + dayNames[dow] + '</h3><div class="day-type">April ' + day + ', 2026</div>' +
+      '<h3>' + dayNames[dow] + '</h3><div class="day-type">May ' + day + ', 2026</div>' +
       rows + progressHtml + mikeNote;
     detail.className = 'day-detail show';
 
